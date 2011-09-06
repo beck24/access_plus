@@ -1,3 +1,8 @@
 Changelog
 
-09/05/2011 - Initial Release
+09/05/2011 - Initial Release tested on 1.8b2
+- General functions checked & upgraded where deprecated
+
+Improvements over 1.7.x latest release
+- updates status metadata for published/unpublished objects
+- updates river items correctly

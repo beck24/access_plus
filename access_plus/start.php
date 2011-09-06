@@ -36,8 +36,6 @@ function access_plus_init() {
 		$blackarray = array();
 		// group open/closed
 		$blackarray[] = "1354927dabe566ba9b5e02082e3c260a";
-		// page write access
-		$blackarray[] = "7daf5c485c0a582297bec6a6dab25e4f";
 		// site administration - default access setting
 		$blackarray[] = "37f86bef6ad8f257cc6c4f498cd5e247";
 		$blacklist = implode(",", $blackarray);
