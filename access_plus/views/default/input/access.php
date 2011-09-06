@@ -55,7 +55,7 @@ if(!$flag){
 }
 
 // get our token and see if this view has been blacklisted
-$token = access_plus_generate_token($vars['internalname']);
+$token = access_plus_generate_token($vars['name']);
 //var_dump($token);
 
 // check to see if our token has been blacklisted
@@ -145,10 +145,10 @@ else{
  */
 ?>
 	<input type="hidden"
-		name="<?php echo $vars['internalname']; ?>"
+		name="<?php echo $vars['name']; ?>"
 		value="<?php echo $flag; ?>">
 		<?php
-		$name = $vars['internalname'];
+		$name = $vars['name'];
 		$oddeven = 0;
 		for($i=0; $i<count($tmpoptions); $i++){
 			$keys = array_keys($tmpoptions[$i]);
@@ -176,7 +176,7 @@ else{
 
 //
 // add the link to toggle the access view if admin
-if(isadminloggedin ()){
+if(isadminloggedin()){
 	$url = $CONFIG->url . "action/access_plus/toggle?token=" . $token;
 	$url = elgg_add_action_tokens_to_url($url);
 	
