@@ -423,6 +423,9 @@ function access_plus_pending_process(){
 						$metadata = get_metadata_byname($guid, "status");
 						update_data("UPDATE {$CONFIG->dbprefix}metadata set access_id='$access_id' WHERE id={$metadata->id}");
 					}
+					
+					//update river with new access
+					update_river_access_by_object($guid, $access_id);
 				}		
 			}
 			elseif($datatype == "metadata"){
