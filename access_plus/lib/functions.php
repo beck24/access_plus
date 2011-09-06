@@ -413,6 +413,16 @@ function access_plus_pending_process(){
 				if(is_numeric($guid) && is_numeric($access_id)){
 					// direct call to database to prevent infinite loop of events
 					update_data("UPDATE {$CONFIG->dbprefix}entities set access_id='$access_id' WHERE guid=$guid");
+					
+					// for 1.8 some plugins (eg. blog) have introduced the "status" metadata to show if published or not
+					// this is set programmatically, so if it exists we should update the permissions on the
+					// status metadata to match that of the object, this way people in metacollections can see it on lists
+					$updatedentity = get_entity($guid);
+					if($updatedentity->status){
+						//the metadata exists
+						$metadata = get_metadata_byname($guid, "status");
+						update_data("UPDATE {$CONFIG->dbprefix}metadata set access_id='$access_id' WHERE id={$metadata->id}");
+					}
 				}		
 			}
 			elseif($datatype == "metadata"){
