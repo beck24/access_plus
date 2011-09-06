@@ -5,6 +5,7 @@
 ******************************************
 
 Designed and Coded by: Matt Beckett
+Udated for 1.8.x
 
 Scope:
 This plugin enables a user to select multiple access collections for a single piece of content,
