@@ -1,0 +1,23 @@
+Changelog
+
+08/12/2011 - v0.4
+Global setting for "Friends" can now be combined with Group collections
+as not everyone in a group may be a friend.
+Moved sync function to hourly cron for performance.
+
+07/31/2011 - v0.4
+Added site administration - default access view to blacklist
+
+07/30/2011 - v0.3
+Added support for multiple objects per access field
+Added support for multiple access fields per form
+Added support for metadata access (eg. profile fields)
+Added support for annotation access (can't think of an example, but it's there if it's needed)
+
+07/28/2011 - v0.2
+Fixed bug with the option generation (alphbetizing and merging with site-wide options)
+Made access level parsing a modular function for future updates (hopefully to handle metadata/annotation access)
+Added individual toggle feature for admin - makes plugin useful even if buggy
+
+07/28/2011 - v0.1
+Initial Release
