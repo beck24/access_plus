@@ -47,7 +47,7 @@ else{
 // simple... right? right.
 
 // so to start, we're going to get our system flag for the current view_count
-$flag = get_plugin_setting('field_count'.$access_view_count, 'access_plus');
+$flag = elgg_get_plugin_setting('field_count'.$access_view_count, 'access_plus');
 
 if(!$flag){
 	//if we have no flag for this count we're creating one
@@ -81,7 +81,7 @@ else{
 	}
 
 	// check to see if the value is a metacollection
-	$metacollection_id = get_plugin_usersetting($vars['value'], get_loggedin_userid(), 'access_plus');
+	$metacollection_id = elgg_get_plugin_user_setting($vars['value'], elgg_get_logged_in_user_guid(), 'access_plus');
 
 	$collectionarray = array($vars['value']);
 	if(!empty($metacollection_id)){
@@ -176,8 +176,8 @@ else{
 
 //
 // add the link to toggle the access view if admin
-if(isadminloggedin()){
-	$url = $CONFIG->url . "action/access_plus/toggle?token=" . $token;
+if(elgg_is_admin_logged_in()){
+	$url = elgg_get_site_url() . "action/access_plus/toggle?token=" . $token;
 	$url = elgg_add_action_tokens_to_url($url);
 	
 	$linktext = elgg_echo('access_plus:toggle:off');

@@ -8,7 +8,7 @@ function access_plus_access_process($event, $object_type, $object){
 	
 	//find which $_POST variable we need
 	// will be an array in the form of $_POST['access_plus#'] where # is the view count
-	$id = get_plugin_setting('get_field_count'.$flag, 'access_plus');
+	$id = elgg_get_plugin_setting('get_field_count'.$flag, 'access_plus');
 	
 	//get our access collections for this object
 	$access = $_POST['access_plus'.$id];
@@ -34,7 +34,7 @@ function access_plus_access_process($event, $object_type, $object){
 //
 // this function adds a string of pending operations to the existing list
 function access_plus_add_to_pending_actions($pending){
-	$currentpending = get_plugin_usersetting('pending_actions', get_loggedin_userid(), 'access_plus');
+	$currentpending = elgg_get_plugin_user_setting('pending_actions', elgg_get_logged_in_user_guid(), 'access_plus');
 	
 	if(!empty($currentpending)){
 		$newpending = $currentpending . "," . $pending;
@@ -43,14 +43,14 @@ function access_plus_add_to_pending_actions($pending){
 		$newpending = $pending;
 	}
 	
-	set_plugin_usersetting('pending_actions', $newpending, get_loggedin_userid(), 'access_plus');	
+	elgg_set_plugin_user_setting('pending_actions', $newpending, elgg_get_logged_in_user_guid(), 'access_plus');	
 }
 
 //
 // adds the user to the list to sync their collections
 // list is stored as a plugin setting, then processed on hourly cron
 function access_plus_add_to_sync_list($event, $object_type, $object){
-	$synclist = get_plugin_setting('synclist', 'access_plus');
+	$synclist = elgg_get_plugin_setting('synclist', 'access_plus');
 	$syncarray = explode(",", $synclist);
 	
 	if(!is_array($syncarray)){
@@ -65,14 +65,14 @@ function access_plus_add_to_sync_list($event, $object_type, $object){
 	$synclist = implode(",", $syncarray);
 	
 	//save the modified list
-	set_plugin_setting('synclist', $synclist, 'access_plus');
+	elgg_set_plugin_setting('synclist', $synclist, 'access_plus');
 }
 
 
 //
 // adds a new id to the list of user collections
 function access_plus_add_to_user_collection_keys($new_acl_id){
-	$currentlist = get_plugin_usersetting('acls', get_loggedin_userid(), 'access_plus');
+	$currentlist = elgg_get_plugin_user_setting('acls', elgg_get_logged_in_user_guid(), 'access_plus');
 	
 	// turn list into an array
 	$currentarray = explode(",", $currentlist);
@@ -87,7 +87,7 @@ function access_plus_add_to_user_collection_keys($new_acl_id){
 	$currentarray = array_values($currentarray);
 	
 	$newlist = implode(",", $currentarray);
-	set_plugin_usersetting('acls', $newlist, get_loggedin_userid(), 'access_plus');
+	elgg_set_plugin_user_setting('acls', $newlist, elgg_get_logged_in_user_guid(), 'access_plus');
 }
 
 //
@@ -97,16 +97,16 @@ function access_plus_add_to_user_collection_keys($new_acl_id){
 // $params['collection_id'], $params['collection'], $params['user_guid']
 function access_plus_add_user($hook, $type, $returnvalue, $params){
 	// set a custom context to overwrite permissions temporarily
-	$context = get_context();
-	set_context('access_plus_permission');
+	$context = elgg_get_context();
+	elgg_set_context('access_plus_permission');
 	
 	//get an array of all of the users metacollections
-	$currentlist = get_plugin_usersetting('acls', get_loggedin_userid(), 'access_plus');
+	$currentlist = elgg_get_plugin_user_setting('acls', elgg_get_logged_in_user_guid(), 'access_plus');
 	$metacollection_array = explode(",", $currentlist);
 	
 	// iterate though the metacollections
 	foreach($metacollection_array as $id){
-		$componentlist = get_plugin_usersetting($id, get_loggedin_userid(), 'access_plus');
+		$componentlist = elgg_get_plugin_user_setting($id, elgg_get_logged_in_user_guid(), 'access_plus');
 		$components = explode(":", $componentlist);
 		
 		if(in_array($params['collection_id'], $components)){
@@ -121,11 +121,11 @@ function access_plus_add_user($hook, $type, $returnvalue, $params){
 		}
 	}
 	
-	set_context($context);
+	elgg_set_context($context);
 }
 
 function access_plus_blacklist($token){
-	$blacklist = get_plugin_setting('blacklist', 'access_plus');
+	$blacklist = elgg_get_plugin_setting('blacklist', 'access_plus');
 	$blackarray = explode(",", $blacklist);
 	
 	if(!in_array($token, $blackarray)){
@@ -135,7 +135,7 @@ function access_plus_blacklist($token){
 	$blackarray = array_values($blackarray);
 	
 	$blacklist = implode(",", $blackarray);
-	set_plugin_setting('blacklist', $blacklist, 'access_plus');
+	elgg_set_plugin_setting('blacklist', $blacklist, 'access_plus');
 }
 
 //
@@ -152,9 +152,9 @@ function access_plus_create_field_count_flag($access_view_count){
 	$id = create_access_collection($key, -9999);
 	
 	// save our flag in plugin settings so we don't have to recreate it next time
-	set_plugin_setting('field_count'.$access_view_count, $id, 'access_plus');
+	elgg_set_plugin_setting('field_count'.$access_view_count, $id, 'access_plus');
 	// save a reverse setting so we can retrieve the field count from the id
-	set_plugin_setting('get_field_count'.$id, $access_view_count, 'access_plus');
+	elgg_set_plugin_setting('get_field_count'.$id, $access_view_count, 'access_plus');
 	
 	return $id;
 }
@@ -168,7 +168,7 @@ function access_plus_create_metacollection($access){
 	
 	for($i=0; $i<count($access); $i++){
 		if($i == 0){
-			$key = get_loggedin_userid() . ":" . $access[0];
+			$key = elgg_get_logged_in_user_guid() . ":" . $access[0];
 		}
 		else{
 			$key .= ":" . $access[$i];
@@ -176,15 +176,15 @@ function access_plus_create_metacollection($access){
 	}
 	
 	// set a custom context to overwrite permissions temporarily
-	$context = get_context();
-	set_context('access_plus_permission');
+	$context = elgg_get_context();
+	elgg_set_context('access_plus_permission');
 
 	// if guid is set to 0, then it defaults to logged in user
 	// use -9999 so that it defaults to 0, and the users collections aren't cluttered
 	$id = create_access_collection($key, -9999);
 	
 	if(!$id){
-		set_context($context);
+		elgg_set_context($context);
 		return false;
 	}
 	else{
@@ -194,7 +194,7 @@ function access_plus_create_metacollection($access){
 			
 			if($access[$i] == ACCESS_FRIENDS){
 				// we're adding every friend we have in this special case
-				$user = get_loggedin_user();
+				$user = elgg_get_logged_in_user_entity();
 				$friends = $user->getFriends("", 0, 0);
 				$tmp_members = array();
 				foreach($friends as $friend){
@@ -221,13 +221,13 @@ function access_plus_create_metacollection($access){
 			}
 		}
 		
-		set_context($context);
+		elgg_set_context($context);
 		return $id;
 	}
 	
 	// return context to it's previous setting so we're not allowing unwarranted access
 	// to anything else
-	set_context($context);
+	elgg_set_context($context);
 }
 
 //
@@ -237,7 +237,7 @@ function access_plus_create_metacollection($access){
 function access_plus_generate_token($name){
 	global $access_view_count;
 
-	$context = get_context();
+	$context = elgg_get_context();
 	
 	return md5($context . $access_view_count . $name);
 }
@@ -246,7 +246,7 @@ function access_plus_generate_token($name){
 // returns true if the access instance is blacklisted
 function access_plus_is_blacklisted($token){
 	// get our blacklist from settings
-	$blacklist = get_plugin_setting('blacklist', 'access_plus');
+	$blacklist = elgg_get_plugin_setting('blacklist', 'access_plus');
 	$blackarray = explode(",", $blacklist);
 
 	if(!is_array($blackarray)){ $blackarray = array(); }
@@ -279,7 +279,7 @@ function access_plus_merge_collections($access){
 	}
 
 	// get our saved access collection id, if it exists
-	$acl_id = get_plugin_usersetting($key, get_loggedin_userid(), 'access_plus');
+	$acl_id = elgg_get_plugin_user_setting($key, elgg_get_logged_in_user_guid(), 'access_plus');
 				
 	if(!$acl_id){
 		//we don't have an existing collection for this combination
@@ -290,8 +290,8 @@ function access_plus_merge_collections($access){
 			//save our new collection ID
 			// we save plugin settings with both the key and value reversed so we can
 			// calculate what collections are merged later on
-			set_plugin_usersetting($key, $new_acl_id, get_loggedin_userid(), 'access_plus');
-			set_plugin_usersetting($new_acl_id, $key, get_loggedin_userid(), 'access_plus');
+			elgg_set_plugin_user_setting($key, $new_acl_id, elgg_get_logged_in_user_guid(), 'access_plus');
+			elgg_set_plugin_user_setting($new_acl_id, $key, elgg_get_logged_in_user_guid(), 'access_plus');
 			access_plus_add_to_user_collection_keys($new_acl_id);
 			$new_access_id = $new_acl_id;
 		}
@@ -393,7 +393,7 @@ function access_plus_parse_access($access){
 function access_plus_pending_process(){
 	global $CONFIG;
 	
-	$pending = get_plugin_usersetting('pending_actions', get_loggedin_userid(), 'access_plus');
+	$pending = elgg_get_plugin_user_setting('pending_actions', elgg_get_logged_in_user_guid(), 'access_plus');
 	
 	if(!empty($pending)){
 		// we have a change to update
@@ -446,12 +446,12 @@ function access_plus_pending_process(){
 		}
 		
 		// finished processing the necessary updates, remove pending actions
-		set_plugin_usersetting('pending_actions', '', get_loggedin_userid(), 'access_plus');
+		elgg_set_plugin_user_setting('pending_actions', '', elgg_get_logged_in_user_guid(), 'access_plus');
 	}
 }
 
 function access_plus_permissions_check(){
-	$context = get_context();
+	$context = elgg_get_context();
 	if($context == "access_plus_permissions"){
 		return true;
 	}
@@ -484,16 +484,16 @@ function access_plus_remove_from_array($value, $array){
 // $params['user_guid'], $params['collection_id']
 function access_plus_remove_user($hook, $type, $returnvalue, $params){
 		// set a custom context to overwrite permissions temporarily
-	$context = get_context();
-	set_context('access_plus_permission');
+	$context = elgg_get_context();
+	elgg_set_context('access_plus_permission');
 	
 	//get an array of all of the users metacollections
-	$currentlist = get_plugin_usersetting('acls', get_loggedin_userid(), 'access_plus');
+	$currentlist = elgg_get_plugin_user_setting('acls', elgg_get_logged_in_user_guid(), 'access_plus');
 	$metacollection_array = explode(",", $currentlist);
 	
 	// iterate though the metacollections
 	foreach($metacollection_array as $id){
-		$componentlist = get_plugin_usersetting($id, get_loggedin_userid(), 'access_plus');
+		$componentlist = elgg_get_plugin_user_setting($id, elgg_get_logged_in_user_guid(), 'access_plus');
 		$components = explode(":", $componentlist);
 		
 		if(in_array($params['collection_id'], $components)){
@@ -516,7 +516,7 @@ function access_plus_remove_user($hook, $type, $returnvalue, $params){
 		}
 	}
 	
-	set_context($context);
+	elgg_set_context($context);
 }
 
 //
@@ -527,19 +527,19 @@ function access_plus_remove_user($hook, $type, $returnvalue, $params){
 function access_plus_sync_metacollections($hook, $entity_type, $returnvalue, $params){
 	global $CONFIG;
 	
-	$synclist = get_plugin_setting('synclist', 'access_plus');
+	$synclist = elgg_get_plugin_setting('synclist', 'access_plus');
 	$syncarray = explode(",", $synclist);
 
 	//set a custom context to overwrite permissions temporarily
-	$context = get_context();
-	set_context('access_plus_permission');
+	$context = elgg_get_context();
+	elgg_set_context('access_plus_permission');
 	
 	foreach($syncarray as $guid){
 		$user = get_user($guid);
 		if($user instanceof ElggUser){
 	
 			//get an array of all of the users metacollections
-			$currentlist = get_plugin_usersetting('acls', $user->guid, 'access_plus');
+			$currentlist = elgg_get_plugin_user_setting('acls', $user->guid, 'access_plus');
 			$metacollection_array = explode(",", $currentlist);
 	
 			// iterate though the metacollections
@@ -549,7 +549,7 @@ function access_plus_sync_metacollections($hook, $entity_type, $returnvalue, $pa
 					// using direct call for performance reasons and brevity
 					$success = delete_data("DELETE FROM {$CONFIG->dbprefix}access_collection_membership WHERE access_collection_id=$id");
 		
-					$componentlist = get_plugin_usersetting($id, get_loggedin_userid(), 'access_plus');
+					$componentlist = elgg_get_plugin_user_setting($id, elgg_get_logged_in_user_guid(), 'access_plus');
 					$components = explode(":", $componentlist);
 		
 					$members = array();
@@ -584,19 +584,19 @@ function access_plus_sync_metacollections($hook, $entity_type, $returnvalue, $pa
 			}	//iterating through metacollections
 		}	// if user is instance of ElggUser
 	} // foreach $synclist
-	set_context($context);
-	set_plugin_setting('synclist', '', 'access_plus');
+	elgg_set_context($context);
+	elgg_set_plugin_setting('synclist', '', 'access_plus');
 }
 
 //
 // removes a token from the blacklist
 function access_plus_unblacklist($token){
-	$blacklist = get_plugin_setting('blacklist', 'access_plus');
+	$blacklist = elgg_get_plugin_setting('blacklist', 'access_plus');
 	$blackarray = explode(",", $blacklist);
 	
 	$blackarray = access_plus_remove_from_array($token, $blackarray);
 	
 	$blacklist = implode(",", $blackarray);
 	
-	set_plugin_setting('blacklist', $blacklist, 'access_plus');
+	elgg_set_plugin_setting('blacklist', $blacklist, 'access_plus');
 }
