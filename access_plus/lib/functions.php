@@ -420,8 +420,8 @@ function access_plus_pending_process(){
 					$updatedentity = get_entity($guid);
 					if($updatedentity->status){
 						//the metadata exists
-						$metadata = get_metadata_byname($guid, "status");
-						update_data("UPDATE {$CONFIG->dbprefix}metadata set access_id='$access_id' WHERE id={$metadata->id}");
+						$metadata = elgg_get_metadata(array('guids' => array($guid), 'metadata_names' => array('status')));
+						update_data("UPDATE {$CONFIG->dbprefix}metadata set access_id='$access_id' WHERE id={$metadata[0]->id}");
 					}
 					
 					//update river with new access
