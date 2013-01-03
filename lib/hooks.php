@@ -74,6 +74,16 @@ function access_plus_collection_delete($hook, $type, $return, $params) {
   }
 }
 
+
+function access_plus_permissions_check($hook, $type, $return, $params){
+	$context = elgg_get_context();
+	if($context == "access_plus_permissions"){
+		return true;
+	}
+	
+	return NULL;
+}
+
 //
 // called by the hook when a user is removed from an access collection
 // checks to see if that collection is used in a metacollection

@@ -269,16 +269,6 @@ function access_plus_parse_access($access){
 }
 
 
-function access_plus_permissions_check(){
-	$context = elgg_get_context();
-	if($context == "access_plus_permissions"){
-		return true;
-	}
-	
-	return NULL;
-}
-
-
 //	removes a single item from an array
 //	resets keys
 //

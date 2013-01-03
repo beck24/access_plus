@@ -37,6 +37,8 @@ function access_plus_init() {
   //call function on user login and logout to synchronize the metacollections with current collections
   elgg_register_event_handler('login', 'user', 'access_plus_add_to_sync_list');
   elgg_register_event_handler('logout', 'user', 'access_plus_add_to_sync_list');
+  elgg_register_event_handler('create', 'friend', 'access_plus_add_friend');
+  elgg_register_event_handler('delete', 'friend', 'access_plus_remove_friend');
 	
   //register action to toggle our access view
   elgg_register_action("access_plus/toggle", elgg_get_plugins_path() . "access_plus/actions/access_plus/toggle.php", 'admin');
