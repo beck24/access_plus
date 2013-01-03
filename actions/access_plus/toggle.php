@@ -1,8 +1,5 @@
 <?php
 
-// make sure only admins are doing this
-admin_gatekeeper();
-
 $token = get_input('token');
 
 //sanity check

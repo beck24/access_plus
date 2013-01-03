@@ -1,0 +1,24 @@
+== Version History ==
+
+x.x (mm/dd/yyyy):
+
+2.0 (01/02/2013):
+ - Major Upgrade - no guaranteed back compatibility - sorry
+ - more logical elgg action handling
+ - no more direct database queries!
+ - better handling of synclist
+ - new plugin hook: 'access_plus', 'selected_options' allows others to override checked items
+ - new plugin hook: 'access_plus', 'available_options' allows others to override available items
+ - collections now tracked via relationships between access objects
+ - all metacollections updated on collection add/remove hooks
+
+1.1 (01/21/2012):
+- upgraded deprecated functions for 1.8.3 "deprecation storm"
+
+1.0 (09/05/2011):
+- Initial Release tested on 1.8b2
+- General functions checked & upgraded where deprecated
+
+Improvements over 1.7.x latest release
+- updates status metadata for published/unpublished objects
+- updates river items correctly
