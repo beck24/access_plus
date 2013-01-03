@@ -118,70 +118,22 @@ function access_plus_remove_user($hook, $type, $returnvalue, $params){
 // plugin was disabled
 function access_plus_sync_metacollections($hook, $entity_type, $returnvalue, $params) {
   $dbprefix = elgg_get_config('dbprefix');
+  
+  //set a custom context to overwrite permissions temporarily
+  $context = elgg_get_context();
+  elgg_set_context('access_plus_permission');
 	
-	// @TODO - use ElggBatch
-	$syncarray = elgg_get_entities_from_relationship(array(
-		'types' => array('user'),
-		'relationship' => 'access_plus_synclist',
-		'relationship_guid' => elgg_get_site_entity()->guid,
-		'inverse_relationship' => true,
-		'limit' => 0
-	));
+  $options = array(
+	'types' => array('user'),
+	'relationship' => 'access_plus_synclist',
+	'relationship_guid' => elgg_get_site_entity()->guid,
+	'inverse_relationship' => true,
+	'limit' => 0
+  );
+  
+  $batch = new ElggBatch('elgg_get_entities_from_relationship', $options, 'access_plus_user_sync', 25);
 
-	//set a custom context to overwrite permissions temporarily
-	$context = elgg_get_context();
-	elgg_set_context('access_plus_permission');
-	
-	foreach ($syncarray as $user) {
-		if ($user instanceof ElggUser) {
-	
-			//get an array of all of the users metacollections
-			$currentlist = elgg_get_plugin_user_setting('acls', $user->guid, 'access_plus');
-			$metacollection_array = explode(",", $currentlist);
-	
-			// iterate though the metacollections
-			foreach ($metacollection_array as $id) {
-				if (is_numeric($id)) {
-					// first we empty the collection
-					// using direct call for performance reasons and brevity
-					delete_data("DELETE FROM {$dbprefix}access_collection_membership WHERE access_collection_id={$id}");
-		
-					$componentlist = elgg_get_plugin_user_setting($id, elgg_get_logged_in_user_guid(), 'access_plus');
-					$components = explode(":", $componentlist);
-		
-					$members = array();
-					for ($i=0; $i<count($components); $i++) {
-						
-						if ($components[$i] == ACCESS_FRIENDS) {
-							$tmpmembers = array();
-							$friends = $user->getFriends("", 0, 0);
-							
-							foreach ($friends as $friend) {
-								$tmpmembers[] = $friend->guid;
-							}
-						}
-						else {
-							$tmpmembers = get_members_of_access_collection($components[$i], true);
-						}
-			
-						if(is_array($tmpmembers)){
-							$members = array_merge($members, $tmpmembers);
-						}
-					}
-			
-					// we now have an array of all the user guids that should be in the metacollection
-					// make sure there's no duplicates, and we'll add them all back in
-					$members = array_unique($members);
-					$members = array_values($members);
-		
-					foreach($members as $member){
-						add_user_to_access_collection($member, $id);
-					}
-				} 	// if id is numeric
-			}	//iterating through metacollections
-		}	// if user is instance of ElggUser
-	} // foreach $synclist
-	
-	access_plus_purge_synclist();
-	elgg_set_context($context);
+
+  access_plus_purge_synclist();
+  elgg_set_context($context);
 }

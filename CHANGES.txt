@@ -11,6 +11,9 @@ x.x (mm/dd/yyyy):
  - new plugin hook: 'access_plus', 'available_options' allows others to override available items
  - collections now tracked via relationships between access objects
  - all metacollections updated on collection add/remove hooks
+ - properly updates metacollections containing all friends on add/remove friend events
+ - cron sync now works with correct permissions
+ - cron sync now appropriately uses relationships instead of serialized arrays
 
 1.1 (01/21/2012):
 - upgraded deprecated functions for 1.8.3 "deprecation storm"

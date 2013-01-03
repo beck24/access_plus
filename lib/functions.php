@@ -1,10 +1,10 @@
 <?php
 
-function access_plus_blacklist($token){
+function access_plus_blacklist($token) {
 	$blacklist = elgg_get_plugin_setting('blacklist', 'access_plus');
 	$blackarray = explode(",", $blacklist);
 	
-	if(!in_array($token, $blackarray)){
+	if (!in_array($token, $blackarray)) {
 		$blackarray[] = $token;
 	}
 	
@@ -112,7 +112,7 @@ function access_plus_create_metacollection($access, $key) {
 // this function generates a token that is unique to a specific instance of an access view
 // tokens can be used to enable or disable multi-use on a per-instance basis
 // uses the name of the input field, as well as context and view count
-function access_plus_generate_token($name){
+function access_plus_generate_token($name) {
 	global $access_view_count;
 
 	$context = elgg_get_context();
@@ -122,14 +122,14 @@ function access_plus_generate_token($name){
 
 //
 // returns true if the access instance is blacklisted
-function access_plus_is_blacklisted($token){
+function access_plus_is_blacklisted($token) {
 	// get our blacklist from settings
 	$blacklist = elgg_get_plugin_setting('blacklist', 'access_plus');
 	$blackarray = explode(",", $blacklist);
 
-	if(!is_array($blackarray)){ $blackarray = array(); }
+	if (!is_array($blackarray)) { $blackarray = array(); }
 	
-	if(in_array($token, $blackarray)){
+	if (in_array($token, $blackarray)) {
 		// it's been blacklisted
 		return true;
 	}
@@ -139,7 +139,7 @@ function access_plus_is_blacklisted($token){
 
 //
 // this function takes accesses and merges the collections
-function access_plus_merge_collections($access){
+function access_plus_merge_collections($access) {
 
 	// now we should have an array of collections that should be merged if necessary
 	// first lets check to see if the collection already exists
@@ -165,21 +165,21 @@ function access_plus_merge_collections($access){
 		'metadata_values' => $key
 	));
 				
-	if(!$access_entity){
+	if (!$access_entity) {
 		//we don't have an existing collection for this combination
 		//have to create a new one
 		$new_acl_id = access_plus_create_metacollection($access, $key);
 					
-		if(is_numeric($new_acl_id)){
+		if (is_numeric($new_acl_id)) {
 			$new_access_id = $new_acl_id;
 		}
-		else{
+		else {
 			//there was a problem, make it private instead and throw an error
 			$new_access_id = ACCESS_PRIVATE;
 			register_error(elgg_echo('access_plus:metacollection:creation:error'));
 		}
 	}
-	else{
+	else {
 		//we have an existing collection for this so we'll use it
 		$new_access_id = $access_entity[0]->access_plus_collection_id;
 	}
@@ -189,7 +189,7 @@ function access_plus_merge_collections($access){
 
 //
 // this function takes an array of accesses, sorts out what the final value should be
-function access_plus_parse_access($access){
+function access_plus_parse_access($access) {
 	/*
 	 *	if $access is not an array we should do nothing
 	 *	if $access has only one item, we should set that as the object access_id
@@ -272,12 +272,12 @@ function access_plus_parse_access($access){
 //	removes a single item from an array
 //	resets keys
 //
-function access_plus_remove_from_array($value, $array){
-	if(!is_array($array)){ return $array; }
-	if(!in_array($value, $array)){ return $array; }
+function access_plus_remove_from_array($value, $array) {
+	if (!is_array($array)) { return $array; }
+	if (!in_array($value, $array)) { return $array; }
 	
-	for($i=0; $i<count($array); $i++){
-		if($value == $array[$i]){
+	for ($i=0; $i<count($array); $i++) {
+		if ($value == $array[$i]) {
 			unset($array[$i]);
 			$array = array_values($array);
 		}
@@ -343,5 +343,57 @@ function access_plus_update_metacollection_remove($result, $getter, $options) {
 	// the user doesn't belong in any other component collections
 	// so we'll remove them from the metacollection
 	remove_user_from_access_collection($options['access_plus_params']['user_guid'], $result->access_plus_collection_id);
+  }
+}
+
+
+function access_plus_user_sync($result, $getter, $options) {
+  $dbprefix = elgg_get_config('dbprefix');
+  
+  $access_entities = elgg_get_entities_from_relationship(array(
+	  'types' => array('object'),
+	  'subtypes' => array('access_plus'),
+	  'owner_guids' => array($result->guid),
+	  'relationship' => ACCESS_PLUS_META_RELATIONSHIP
+  ));
+  
+  if (empty($access_entities)) {
+	return;
+  }
+	
+  // iterate though the metacollections
+  foreach ($access_entities as $entity) {
+	// first we empty the collection
+	// using direct call for performance reasons and brevity
+	delete_data("DELETE FROM {$dbprefix}access_collection_membership WHERE access_collection_id={$entity->access_plus_collection_id}");
+	$components = $entity->access_plus_collections;
+	$members = array();
+	for ($i=0; $i<count($components); $i++) {
+					
+		if ($components[$i] == ACCESS_FRIENDS) {
+			$tmpmembers = array();
+			$friends = $user->getFriends("", 0, 0);
+							
+			foreach ($friends as $friend) {
+				$tmpmembers[] = $friend->guid;
+			}
+		}
+		else {
+			$tmpmembers = get_members_of_access_collection($components[$i], true);
+		}
+			
+		if (is_array($tmpmembers)) {
+			$members = array_merge($members, $tmpmembers);
+		}
+	}
+			
+	// we now have an array of all the user guids that should be in the metacollection
+	// make sure there's no duplicates, and we'll add them all back in
+	$members = array_unique($members);
+	$members = array_values($members);
+		
+	foreach ($members as $member) {
+		add_user_to_access_collection($member, $entity->access_plus_collection_id);
+	}
   }
 }
